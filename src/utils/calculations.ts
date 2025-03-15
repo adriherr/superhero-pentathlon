@@ -32,45 +32,62 @@ const getScores = (heroes: HeroInterface[]): {[key: string]: number} => {
     let heroesScores: {[key: string]: number} = {};
     let testWins: {[key: string]: number} = {};
 
+    // Calculate Climbing Skyscrapers Score
     heroes.forEach(hero => {
         heroesScores[hero.id!] = getClimbingSkyscrapersScore(hero.attributes);
         testWins[hero.id!] = 0;
     });
 
+    // Calculate Tell Jokes Score
     heroes.forEach(hero => {
         heroesScores[hero.id!] += getTellJokesScore(hero.id!, heroes);
     });
 
-
+    // Calculate Villain Shot Score
     let minScore = Infinity;
     let lastHero = '';
     
     Object.entries(heroesScores).forEach(([heroId, heroScore]) => {
-    if (heroScore < minScore) {
-        lastHero = heroId;
-    }
+        if (heroScore < minScore) {
+            minScore = heroScore;
+            lastHero = heroId;
+        }
     });
-      
 
-    // heroes.forEach(hero => {
-    //     const isLast: boolean = hero.id === lowestVillainShotHeroId;
-    //     const score = getVillainShotScore(hero.attributes, isLast);
-    //     heroesScores[hero.id!] += score;
-    //     if (score > highestVillainShotScore) {
-    //         highestVillainShotScore = score;
-    //         highestVillainShotHeroId = hero.id!;
-    //     }
-    // });
+    heroes.forEach(hero => {
+        const isLast: boolean = hero.id === lastHero;
+        const score = getVillainShotScore(hero.attributes, isLast);
+        heroesScores[hero.id!] += score;
+        if (score > 0) {
+            testWins[hero.id!] += 1;
+        }
+    });
 
-    // heroes.forEach(hero => {
-    //     const isLast: boolean = hero.id === highestVillainShotHeroId;
-    //     heroesScores[hero.id!] += get200kmRunScore(hero.attributes, isLast);
-    // });
+    // Calculate 200km Run Score
+    let maxVillainShotScore = -Infinity;
+    let firstHero = '';
 
-    // heroes.forEach(hero => {
-    //     const wonTwoTests = testWins[hero.id!] >= 2;
-    //     heroesScores[hero.id!] += get100CatsRescueScore(hero.attributes, wonTwoTests);
-    // });
+    Object.entries(heroesScores).forEach(([heroId, heroScore]) => {
+        if (heroScore > maxVillainShotScore) {
+            maxVillainShotScore = heroScore;
+            firstHero = heroId;
+        }
+    });
+
+    heroes.forEach(hero => {
+        const isFirst: boolean = hero.id === firstHero;
+        const score = get200kmRunScore(hero.attributes, isFirst);
+        heroesScores[hero.id!] += score;
+        if (score > 0) {
+            testWins[hero.id!] += 1;
+        }
+    });
+
+    // Calculate 100 Cats Rescue Score
+    heroes.forEach(hero => {
+        const wonTwoTests = testWins[hero.id!] >= 2;
+        heroesScores[hero.id!] += get100CatsRescueScore(hero.attributes, wonTwoTests);
+    });
 
     return heroesScores;
 }
